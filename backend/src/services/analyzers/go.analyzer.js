@@ -1,16 +1,24 @@
 const { execFile } = require("child_process");
 const path = require("path");
 
+const emptyAnalysis = () => ({
+  errorCount: 0,
+  warningCount: 0,
+  findings: [],
+});
+
 const parseGoVetOutput = (output) => {
+  if (!output.trim()) {
+    return emptyAnalysis();
+  }
+
   const findings = output
     .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => {
       const match = line.match(/^(.+?):(\d+):(\d+):\s+(.+)$/);
 
-      if (!match) {
-        return null;
-      }
+      if (!match) return null;
 
       const [, , row, column, message] = match;
 
@@ -33,41 +41,33 @@ const parseGoVetOutput = (output) => {
   };
 };
 
-const runGoAnalyzer = async (filePath) => {
-  return new Promise((resolve, reject) => {
-    const workingDirectory = path.dirname(filePath);
-    const fileName = path.basename(filePath);
+const runGoAnalyzer = (filePath) =>
+  new Promise((resolve, reject) => {
+    const cwd = path.dirname(filePath);
+    const file = path.basename(filePath);
 
     execFile(
       "go",
-      ["vet", fileName],
+      ["vet", file],
       {
-        cwd: workingDirectory,
+        cwd,
         windowsHide: true,
-        maxBuffer: 5 * 1024 * 1024,
       },
       (error, stdout, stderr) => {
-        const output = `${stdout || ""}\n${stderr || ""}`.trim();
+        const output = `${stdout}\n${stderr}`.trim();
 
         if (output) {
           return resolve(parseGoVetOutput(output));
         }
 
-        if (error && error.code === "ENOENT") {
-          return reject(
-            new Error("Go is not installed or is not available in PATH")
-          );
+        if (error?.code === "ENOENT") {
+          return reject(new Error("Go is not installed"));
         }
 
-        return resolve({
-          errorCount: 0,
-          warningCount: 0,
-          findings: [],
-        });
+        resolve(emptyAnalysis());
       }
     );
   });
-};
 
 module.exports = {
   runGoAnalyzer,
