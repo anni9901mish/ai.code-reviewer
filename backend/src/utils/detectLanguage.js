@@ -43,6 +43,7 @@ const languageMap = {
   ".md": "Markdown",
   ".sh": "Shell",
   ".ps1": "PowerShell",
+  
 };
 
 const detectLanguage = (fileName) => {

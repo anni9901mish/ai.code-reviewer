@@ -56,19 +56,31 @@ const uploadFile = async (req, res) => {
       staticAnalysis,
     });
 
-    const aiResult = await reviewCodeWithAI({
-      code,
-      language,
-      staticAnalysis,
-    });
+    let aiResult = null;
+    let updatedReview = review;
+    let aiError = null;
 
-    const updatedReview = await updateReviewWithAI(
-      review.id,
-      aiResult
-    );
+    try {
+      aiResult = await reviewCodeWithAI({
+        code,
+        language,
+        staticAnalysis,
+      });
+
+      updatedReview = await updateReviewWithAI(
+        review.id,
+        aiResult
+      );
+    } catch (error) {
+      aiError = error.message || "AI review temporarily unavailable";
+
+      console.log("AI REVIEW SKIPPED:", aiError);
+    }
 
     return res.status(201).json({
-      message: "File analyzed and AI review saved successfully",
+      message: aiResult
+        ? "File analyzed and AI review saved successfully"
+        : "Static analysis completed. AI review temporarily unavailable.",
       file: {
         originalName: req.file.originalname,
         storedName: req.file.filename,
@@ -77,10 +89,11 @@ const uploadFile = async (req, res) => {
       },
       staticAnalysis,
       aiAnalysis: aiResult,
+      aiError,
       review: updatedReview,
     });
   } catch (error) {
-    console.log("UPLOAD/AI ERROR:", error);
+    console.log("UPLOAD ERROR:", error);
 
     return res.status(error.statusCode || 500).json({
       message: error.message || "File analysis failed",

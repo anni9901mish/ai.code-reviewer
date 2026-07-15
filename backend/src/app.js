@@ -8,6 +8,7 @@ const reviewRoutes = require("./routes/review.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
+const zipRoutes = require("./routes/zip.routes");
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use(
   swaggerUi.setup(swaggerSpec)
 );
 
+app.use("/api/upload/project", zipRoutes);
 
 app.use((error, req, res, next) => {
   console.error("EXPRESS ERROR:", error);
