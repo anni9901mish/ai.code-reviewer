@@ -11,6 +11,7 @@ const swaggerSpec = require("./docs/swagger");
 const zipRoutes = require("./routes/zip.routes");
 const projectScanRoutes = require("./routes/project-scan.routes");
 const githubRoutes = require("./routes/github.routes");
+const pdfRoutes = require("./routes/pdf.routes");
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api/upload/project", zipRoutes);
 
 app.use("/api/project-scans", projectScanRoutes);
 app.use("/api/github", githubRoutes);
+app.use("/api/pdf", pdfRoutes);
 
 app.use((error, req, res, next) => {
   console.error("EXPRESS ERROR:", error);

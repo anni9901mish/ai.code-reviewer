@@ -25,6 +25,7 @@
     "glob": "^13.0.6",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
+    "pdfkit": "^0.19.1",
     "prisma": "^6.19.3",
     "simple-git": "^3.36.0",
     "swagger-jsdoc": "^6.3.0",
