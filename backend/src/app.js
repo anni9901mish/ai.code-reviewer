@@ -9,6 +9,8 @@ const dashboardRoutes = require("./routes/dashboard.routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
 const zipRoutes = require("./routes/zip.routes");
+const projectScanRoutes = require("./routes/project-scan.routes");
+const githubRoutes = require("./routes/github.routes");
 
 const app = express();
 
@@ -31,13 +33,12 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec)
-);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/upload/project", zipRoutes);
+
+app.use("/api/project-scans", projectScanRoutes);
+app.use("/api/github", githubRoutes);
 
 app.use((error, req, res, next) => {
   console.error("EXPRESS ERROR:", error);

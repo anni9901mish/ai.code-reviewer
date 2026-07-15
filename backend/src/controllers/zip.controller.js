@@ -19,11 +19,23 @@ const {
   reviewProjectWithAI,
 } = require("../services/project-ai.service");
 
+const {
+  saveProjectScan,
+} = require("../services/project-scan.service");
+
 const uploadProjectZip = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
         message: "ZIP file is required",
+      });
+    }
+
+    const projectId = Number(req.body.projectId);
+
+    if (!projectId) {
+      return res.status(400).json({
+        message: "Project ID is required",
       });
     }
 
@@ -59,6 +71,7 @@ const uploadProjectZip = async (req, res) => {
         languageSummary: {},
         projectAiReview: null,
         aiError: null,
+        scan: null,
         results: [],
       });
     }
@@ -166,11 +179,9 @@ const uploadProjectZip = async (req, res) => {
       );
     }
 
-    return res.status(200).json({
-      message: projectAiReview
-        ? "Project extracted, analyzed and AI reviewed successfully"
-        : "Project extracted and analyzed. AI project review is temporarily unavailable.",
-      folder: folderName,
+    const savedScan = await saveProjectScan({
+      projectId,
+      folderName,
       totalFiles: files.length,
       analyzedFiles: successfulResults.length,
       failedFiles: failedResults.length,
@@ -181,16 +192,33 @@ const uploadProjectZip = async (req, res) => {
       aiError,
       results,
     });
+
+    return res.status(200).json({
+      message: projectAiReview
+        ? "Project extracted, analyzed, AI reviewed and saved successfully"
+        : "Project extracted, analyzed and saved. AI project review is temporarily unavailable.",
+      folder: folderName,
+      totalFiles: files.length,
+      analyzedFiles: successfulResults.length,
+      failedFiles: failedResults.length,
+      totalErrors,
+      totalWarnings,
+      languageSummary,
+      projectAiReview,
+      aiError,
+      scan: savedScan,
+      results,
+    });
   } catch (error) {
     console.log("ZIP UPLOAD ERROR:", error);
 
-    return res.status(
-      error.statusCode || 500
-    ).json({
-      message:
-        error.message ||
-        "Project ZIP processing failed",
-    });
+    return res
+      .status(error.statusCode || 500)
+      .json({
+        message:
+          error.message ||
+          "Project ZIP processing failed",
+      });
   }
 };
 

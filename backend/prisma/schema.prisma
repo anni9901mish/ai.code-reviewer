@@ -28,7 +28,8 @@ model Project {
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  reviews Review[]
+  reviews      Review[]
+  projectScans ProjectScan[]
 }
 
 model Review {
@@ -54,4 +55,51 @@ model Finding {
 
   reviewId Int
   review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+}
+
+model ProjectScan {
+  id Int @id @default(autoincrement())
+
+  folderName String
+
+  totalFiles    Int
+  analyzedFiles Int
+  failedFiles   Int
+
+  totalErrors   Int
+  totalWarnings Int
+
+  overallScore Int?
+
+  languageSummary Json
+  aiReview        Json?
+  aiError         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  files ProjectScanFile[]
+}
+
+model ProjectScanFile {
+  id Int @id @default(autoincrement())
+
+  fileName String
+  language String
+  status   String
+
+  errorCount   Int
+  warningCount Int
+
+  staticAnalysis Json
+
+  analysisError String?
+
+  createdAt DateTime @default(now())
+
+  scanId Int
+  scan   ProjectScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
 }

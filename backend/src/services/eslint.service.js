@@ -5,14 +5,41 @@ const analyzeJavaScript = async (filePath) => {
     overrideConfigFile: true,
     overrideConfig: [
       {
-        files: ["**/*.js", "**/*.jsx"],
+        files: ["**/*.{js,jsx,mjs,cjs}"],
+
         languageOptions: {
-  ecmaVersion: "latest",
-  sourceType: "module",
-  globals: {
-    console: "readonly",
-  },
-},
+          ecmaVersion: "latest",
+          sourceType: "module",
+
+          parserOptions: {
+            ecmaFeatures: {
+              jsx: true,
+            },
+          },
+
+          globals: {
+            console: "readonly",
+            window: "readonly",
+            document: "readonly",
+            navigator: "readonly",
+            localStorage: "readonly",
+            sessionStorage: "readonly",
+            fetch: "readonly",
+            alert: "readonly",
+            prompt: "readonly",
+            confirm: "readonly",
+            setTimeout: "readonly",
+            clearTimeout: "readonly",
+            setInterval: "readonly",
+            clearInterval: "readonly",
+            process: "readonly",
+            module: "readonly",
+            require: "readonly",
+            __dirname: "readonly",
+            exports: "readonly",
+          },
+        },
+
         rules: {
           "no-unused-vars": "warn",
           "no-undef": "error",
@@ -20,7 +47,7 @@ const analyzeJavaScript = async (filePath) => {
           "no-constant-condition": "warn",
           "no-extra-semi": "warn",
           "no-debugger": "warn",
-          "eqeqeq": "warn",
+          eqeqeq: "warn",
           "prefer-const": "warn",
         },
       },
@@ -32,7 +59,10 @@ const analyzeJavaScript = async (filePath) => {
   const findings = results.flatMap((result) =>
     result.messages.map((message) => ({
       ruleId: message.ruleId || "syntax-error",
-      severity: message.severity === 2 ? "error" : "warning",
+      severity:
+        message.severity === 2
+          ? "error"
+          : "warning",
       message: message.message,
       line: message.line,
       column: message.column,
@@ -43,11 +73,11 @@ const analyzeJavaScript = async (filePath) => {
 
   return {
     errorCount: results.reduce(
-      (total, result) => total + result.errorCount,
+      (sum, result) => sum + result.errorCount,
       0
     ),
     warningCount: results.reduce(
-      (total, result) => total + result.warningCount,
+      (sum, result) => sum + result.warningCount,
       0
     ),
     findings,
