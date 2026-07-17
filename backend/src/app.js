@@ -16,7 +16,41 @@ const accountRoutes = require("./routes/account.routes");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ai-code-reviewer-ten-tau.vercel.app",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      const error = new Error(
+        `CORS blocked request from origin: ${origin}`
+      );
+
+      error.statusCode = 403;
+
+      return callback(error);
+    },
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
+  })
+);
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -35,10 +69,14 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
 
 app.use("/api/upload/project", zipRoutes);
-
 app.use("/api/project-scans", projectScanRoutes);
 app.use("/api/github", githubRoutes);
 app.use("/api/pdf", pdfRoutes);
