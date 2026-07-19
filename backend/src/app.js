@@ -18,22 +18,14 @@ const app = express();
 
 app.use(
   cors({
-    origin: true,
+    origin: "https://ai-code-reviewer-ai.vercel.app",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    methods: [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "OPTIONS",
-    ],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-    ],
   })
 );
+
+app.options("*", cors());
 
 app.use(express.json());
 
