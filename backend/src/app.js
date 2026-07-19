@@ -16,53 +16,24 @@ const accountRoutes = require("./routes/account.routes");
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://ai-code-reviewer-ten-tau.vercel.app",
-  "https://ai-code-reviewer-git-main-anni9901mishs-projects.vercel.app",
-];
-
-const corsOptions = {
-  origin(origin, callback) {
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    const isAllowedOrigin =
-      allowedOrigins.includes(origin) ||
-      origin.endsWith(".vercel.app");
-
-    if (isAllowedOrigin) {
-      return callback(null, true);
-    }
-
-    const error = new Error(
-      `CORS blocked request from origin: ${origin}`
-    );
-
-    error.statusCode = 403;
-
-    return callback(error);
-  },
-
-  methods: [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-  ],
-
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-  ],
-
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
+  })
+);
 
 app.use(express.json());
 
